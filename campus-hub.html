@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CampusHub – Smart Academic Management</title>
+<style>
+:root{--bg:#f6f7fb;--sf:#fff;--tx:#1b1f2a;--mu:#667085;--bd:#e3e6ee;--ac:#4f46e5;--ok:#16a34a;--wr:#d97706;--er:#dc2626;--ac2:#eef0ff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1219;--sf:#181c27;--tx:#e8eaf0;--mu:#98a1b3;--bd:#2a3042;--ac:#818cf8;--ac2:#232845;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f1219;--sf:#181c27;--tx:#e8eaf0;--mu:#98a1b3;--bd:#2a3042;--ac:#818cf8;--ac2:#232845;color-scheme:dark}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:12px 18px;background:var(--sf);border-bottom:1px solid var(--bd)}
+h1{font-size:18px;margin:0}h2{margin:0 0 4px;font-size:20px}h3{margin:0 0 10px;font-size:15px}
+nav{display:flex;gap:6px;overflow-x:auto;padding:10px 18px;background:var(--sf);border-bottom:1px solid var(--bd)}
+nav button{white-space:nowrap}
+main{max-width:1100px;margin:0 auto;padding:18px}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:16px;margin-bottom:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+button,select,input,textarea{font:inherit;color:var(--tx);background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:7px 11px}
+button{cursor:pointer}button.p,nav button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+textarea{width:100%;min-height:220px;font-family:ui-monospace,Menlo,monospace;font-size:13px}
+label{display:block;font-size:12px;color:var(--mu);margin:8px 0 3px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:end}.row>*{flex:1;min-width:130px}
+.tw{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--bd)}th{color:var(--mu);font-weight:600;font-size:12px}
+.tag{display:inline-block;padding:1px 9px;border-radius:99px;font-size:12px;background:var(--ac2);color:var(--ac)}
+.ok{color:var(--ok)}.wr{color:var(--wr)}.er{color:var(--er)}.mu{color:var(--mu)}
+.msg{padding:9px 12px;border-radius:8px;margin:10px 0;background:var(--ac2)}.msg.er{background:rgba(220,38,38,.12)}
+.hit{border-left:3px solid var(--ac);padding:4px 10px;margin:8px 0;background:var(--bg);border-radius:4px}
+svg text{fill:var(--mu);font-size:11px}
+.lv{width:26px;height:26px;padding:0;border-radius:6px}
+</style></head><body>
+<header><div><h1>🎓 CampusHub</h1><span class="mu" style="font-size:12px">Smart academic management · demo data</span></div>
+<div class="row" style="flex:0 0 auto"><div><label style="margin:0">Signed in as</label>
+<select id="role"></select></div></div></header>
+<nav id="nav"></nav><main id="main"></main>
+<script>
+const $=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const ROLES={Admin:"Administrator",Faculty:"Faculty member",Technician:"Lab technician",Student:"Student"};
+const MODS=[["faculty","AI Faculty Assistant",["Admin","Faculty"]],["lab","Smart Laboratory",["Admin","Faculty","Technician","Student"]],["analytics","Learning Analytics",["Admin","Faculty","Student"]],["resources","Resource Optimization",["Admin","Technician"]],["kb","Knowledge Assistant",["Admin","Faculty","Technician","Student"]]];
+const S={role:"Faculty",mod:"faculty",
+students:["Aarav","Divya","Karthik","Meena","Rohan","Sana"],
+att:[[38,40],[33,40],[29,40],[39,40],[31,40],[36,40]],
+topics:{Arrays:[82,75,68,90,71,85],Recursion:[48,52,39,61,45,58],Sorting:[70,66,59,80,62,77],Graphs:[41,50,44,57,38,49],"SQL Joins":[76,81,64,88,70,79],Pointers:[55,47,52,63,50,60]},
+prog:{Aarav:[58,64,70,76,82],Divya:[55,57,63,66,75],Karthik:[45,50,48,58,68],Meena:[70,74,80,84,90],Rohan:[48,52,58,60,71],Sana:[60,66,69,75,85]},
+months:["Jun","Jul","Aug","Sep","Oct"],selStu:"Aarav",
+equip:[["Oscilloscope","Electronics"],["Digital Microscope","Biology"],["Spectrometer","Chemistry"],["3D Printer","Fabrication"],["Soldering Station","Electronics"],["Centrifuge","Biology"]],
+res:[["Oscilloscope","2026-10-28","10:00","12:00","Divya"],["3D Printer","2026-10-28","14:00","16:00","Rohan"]],
+usage:{Oscilloscope:34,"Digital Microscope":21,Spectrometer:15,"3D Printer":42,"Soldering Station":28,Centrifuge:9},
+skills:["Circuit assembly","Microscopy","Titration","CAD printing"],
+comp:{Aarav:[3,2,1,2],Divya:[2,3,2,1],Karthik:[1,1,0,2],Meena:[3,3,3,2],Rohan:[2,1,1,3],Sana:[2,2,3,1]},
+mats:[],
+rd:{Electricity:{u:"kWh",rate:8,v:[410,395,402,420,415,690,405,398]},Water:{u:"L",rate:.04,v:[5200,5100,7900,5300,5250,5150,5300,5200]},"Lab supplies":{u:"units",rate:120,v:[60,58,64,61,59,63,95,62]}},
+docs:[{n:"Attendance Policy.txt",l:0,t:"Students must maintain at least 75% attendance to be eligible for end-semester examinations.\n\nMedical leave requires a certificate submitted within 7 days of returning."},
+{n:"Lab Safety Procedure.txt",l:0,t:"Safety goggles and lab coats are mandatory inside all laboratories.\n\nChemical spills must be reported to the lab technician immediately. Never work alone in the chemistry lab."},
+{n:"Faculty Handbook.txt",l:1,t:"Internal assessment marks must be submitted within 10 working days of the test.\n\nQuestion papers are moderated by a second faculty member before approval."},
+{n:"Budget Review 2026.txt",l:2,t:"The laboratory consumables budget was exceeded by 12 percent this year.\n\nSalary revision proposals are confidential and restricted to administrators."}]};
+const LV=["Public","Staff only","Confidential (Admin)"],rank=r=>({Admin:2,Faculty:1,Technician:1,Student:0})[r];
+const avg=a=>a.reduce((x,y)=>x+y,0)/a.length,sd=a=>Math.sqrt(avg(a.map(x=>(x-avg(a))**2)));
+function bars(items,max=100,thr){return `<svg viewBox="0 0 520 ${items.length*30+6}" width="100%">${items.map(([k,v],i)=>`<text x="0" y="${i*30+18}">${esc(k)}</text><rect x="95" y="${i*30+5}" width="${Math.max(2,v/max*370)}" height="18" rx="4" fill="${thr&&v<thr?"var(--er)":"var(--ac)"}"/><text x="${100+v/max*370}" y="${i*30+18}">${Math.round(v)}</text>`).join("")}</svg>`}
+function line(vals,labels,flag){const w=520,h=170,mx=Math.max(...vals)*1.1,mn=Math.min(...vals)*.85,X=i=>40+i*(w-60)/(vals.length-1),Y=v=>h-25-(v-mn)/(mx-mn)*(h-45);
+return `<svg viewBox="0 0 ${w} ${h}" width="100%"><polyline fill="none" stroke="var(--ac)" stroke-width="2.5" points="${vals.map((v,i)=>X(i)+","+Y(v)).join(" ")}"/>${vals.map((v,i)=>`<circle cx="${X(i)}" cy="${Y(v)}" r="${flag&&flag(v,i)?6:3.5}" fill="${flag&&flag(v,i)?"var(--er)":"var(--ac)"}"/><text x="${X(i)-8}" y="${h-6}">${labels[i]}</text>`).join("")}<text x="0" y="12">${Math.round(mx)}</text><text x="0" y="${h-25}">${Math.round(mn)}</text></svg>`}
+function init(){const r=$("#role");r.innerHTML=Object.entries(ROLES).map(([k,v])=>`<option value="${k}">${v}</option>`).join("");r.value=S.role;r.onchange=()=>{S.role=r.value;if(!allowed(S.mod))S.mod=MODS.find(m=>m[2].includes(S.role))[0];draw()};draw()}
+const allowed=m=>MODS.find(x=>x[0]==m)[2].includes(S.role);
+function draw(){$("#nav").innerHTML=MODS.filter(m=>m[2].includes(S.role)).map(m=>`<button class="${m[0]==S.mod?"on":""}" onclick="S.mod='${m[0]}';draw()">${m[1]}</button>`).join("");$("#main").innerHTML=V[S.mod]();(A[S.mod]||(()=>{}))()}
+const can=(...r)=>r.includes(S.role);
+const V={
+faculty(){const lowAtt=S.att.filter(a=>a[0]/a[1]<.75).length;return `<h2>AI Faculty Assistant</h2><p class="mu">Drafts are generated from templates and are always editable. Review before using.</p>
+<div class="grid"><div class="card"><h3>Generate content</h3>
+<label>Type</label><select id="gt"><option>Lesson plan</option><option>Quiz</option><option>Question paper</option><option>Academic report</option></select>
+<div class="row"><div><label>Course / topic</label><input id="gc" value="Data Structures: Recursion"></div><div><label>Duration / items</label><input id="gn" type="number" value="5" min="1" max="20"></div></div>
+<p><button class="p" onclick="gen()">Generate draft</button></p>
+<label>Draft (editable)</label><textarea id="gd" placeholder="Your draft appears here…"></textarea>
+<div class="row" style="margin-top:8px"><div><input id="gname" placeholder="Save as…"></div><div><button onclick="saveMat()">Save to materials</button></div></div></div>
+<div class="card"><h3>Teaching materials & assignments</h3><div id="mats"></div></div></div>
+<div class="grid"><div class="card"><h3>Attendance summary</h3><p class="mu">${lowAtt} student(s) below the 75% threshold.</p><div class="tw"><table><tr><th>Student</th><th>Present</th><th>%</th></tr>${S.students.map((s,i)=>{const p=S.att[i][0]/S.att[i][1]*100;return `<tr><td>${s}</td><td>${S.att[i][0]}/${S.att[i][1]}</td><td class="${p<75?"er":"ok"}">${p.toFixed(1)}% ${p<75?"⚠":""}</td></tr>`}).join("")}</table></div></div>
+<div class="card"><h3>Grading assistant</h3><label>Marks (comma-separated, out of 100)</label><input id="gm" value="82,67,45,91,58,74" style="width:100%"><p><button class="p" onclick="grade()">Suggest grades</button></p><div id="gout"></div><p class="mu" style="font-size:12px">Suggestions use fixed cut-offs (90/80/70/60/50). Faculty make the final decision.</p></div></div>`},
+lab(){const e=can("Admin","Technician","Faculty","Student");return `<h2>Smart Laboratory Management</h2><div class="grid"><div class="card"><h3>Equipment & availability</h3><div class="tw"><table><tr><th>Equipment</th><th>Lab</th><th>Now</th></tr>${S.equip.map(([n,l])=>{const b=S.res.some(r=>r[0]==n&&r[1]==new Date().toISOString().slice(0,10));return `<tr><td>${n}</td><td>${l}</td><td class="${b?"wr":"ok"}">${b?"Reserved today":"Available"}</td></tr>`}).join("")}</table></div></div>
+<div class="card"><h3>Reserve equipment</h3><label>Equipment</label><select id="re">${S.equip.map(x=>`<option>${x[0]}</option>`).join("")}</select>
+<div class="row"><div><label>Date</label><input id="rd" type="date" value="2026-10-28"></div><div><label>Start</label><input id="rs" type="time" value="10:00"></div><div><label>End</label><input id="rn" type="time" value="11:00"></div></div>
+<label>Reserved for</label><input id="ru" value="${S.role=="Student"?"Divya":""}" placeholder="Name"><p><button class="p" onclick="reserve()">Reserve</button></p><div id="rm"></div></div></div>
+<div class="card"><h3>Reservations</h3><div class="tw"><table><tr><th>Equipment</th><th>Date</th><th>Time</th><th>User</th><th></th></tr>${S.res.map((r,i)=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}–${r[3]}</td><td>${esc(r[4])}</td><td>${can("Admin","Technician")?`<button onclick="S.res.splice(${i},1);draw()">Cancel</button>`:""}</td></tr>`).join("")||`<tr><td colspan=5 class="mu">None</td></tr>`}</table></div></div>
+<div class="grid"><div class="card"><h3>Usage (hours this term)</h3>${bars(Object.entries(S.usage),50)}</div>
+<div class="card"><h3>Practical competencies</h3><p class="mu" style="font-size:12px">0 none · 1 basic · 2 proficient · 3 expert${can("Admin","Technician","Faculty")?" — click a cell to update":""}</p><div class="tw"><table><tr><th></th>${S.skills.map(s=>`<th>${s}</th>`).join("")}</tr>${S.students.filter(s=>S.role!="Student"||s=="Divya").map(s=>`<tr><td>${s}</td>${S.comp[s].map((v,i)=>`<td><button class="lv" ${can("Admin","Technician","Faculty")?`onclick="S.comp['${s}'][${i}]=(S.comp['${s}'][${i}]+1)%4;draw()"`:"disabled"}>${v}</button></td>`).join("")}</tr>`).join("")}</table></div></div></div>`},
+analytics(){const t=Object.entries(S.topics).map(([k,v])=>[k,avg(v)]),hard=t.filter(x=>x[1]<60).sort((a,b)=>a[1]-b[1]),stu=S.role=="Student"?"Divya":S.selStu,p=S.prog[stu];
+const REC={Recursion:["Trace factorial/fibonacci call stacks by hand","Practice: 10 base-case identification problems"],Graphs:["Review BFS vs DFS with small adjacency lists","Practice: 8 traversal and shortest-path questions"],Pointers:["Draw memory diagrams for pointer assignments","Practice: 10 pointer-arithmetic questions"],Sorting:["Compare sort complexities in a table","Practice: 6 stability and trace questions"]};
+return `<h2>Student Learning Analytics</h2><div class="grid"><div class="card"><h3>Class average by topic <span class="mu">(red &lt; 60)</span></h3>${bars(t,100,60)}</div>
+<div class="card"><h3>Difficult topics</h3>${hard.map(([k,v])=>`<p><b>${k}</b> <span class="tag">${Math.round(v)}% avg</span><br><span class="mu">${(REC[k]||["Revisit lecture notes"]).join(" · ")}</span></p>`).join("")||"<p class='ok'>No topic is below 60%.</p>"}<p class="mu" style="font-size:12px">Based on quiz and assessment scores only.</p></div></div>
+<div class="card"><h3>Progress over time ${S.role=="Student"?"— "+stu:`<select onchange="S.selStu=this.value;draw()">${S.students.map(s=>`<option ${s==stu?"selected":""}>${s}</option>`).join("")}</select>`}</h3>${line(p,S.months)}<p class="mu">Observed scores: ${p.join(" → ")}. Change since June: <b>${p[4]-p[0]>=0?"+":""}${p[4]-p[0]}</b> points. No future predictions are made.</p></div>`},
+resources(){const keys=Object.keys(S.rd);return `<h2>Smart Resource Optimization</h2><div class="msg">Demo-data mode: simulated weekly readings (no live sensors connected).</div>${keys.map(k=>{const d=S.rd[k],m=avg(d.v),s=sd(d.v),bad=v=>v>m+1.5*s,tot=d.v.reduce((a,b)=>a+b,0)*d.rate,odd=d.v.map((v,i)=>bad(v)?i:-1).filter(i=>i>=0);
+return `<div class="card"><h3>${k} (${d.u}/week) <span class="tag">Est. cost ₹${Math.round(tot).toLocaleString("en-IN")} / 8 wks</span></h3>${line(d.v,d.v.map((_,i)=>"W"+(i+1)),bad)}${odd.length?`<div class="msg er">⚠ Unusual usage in week ${odd.map(i=>i+1).join(", ")}: ${d.v[odd[0]].toLocaleString()} ${d.u} vs. typical ${Math.round(m).toLocaleString()}. Check for leaks, equipment left on, or unlogged use.</div>`:`<p class="ok">No unusual usage detected.</p>`}</div>`}).join("")}`},
+kb(){const lv=rank(S.role);return `<h2>Institutional Knowledge Assistant</h2><p class="mu">Access level for ${ROLES[S.role]}: ${LV[lv]} and below.</p><div class="grid"><div class="card"><h3>Ask a question</h3><div class="row"><input id="q" placeholder="e.g. minimum attendance for exams" onkeydown="if(event.key=='Enter')ask()"><button class="p" onclick="ask()" style="flex:0">Search</button></div><div id="ans"></div></div>
+<div class="card"><h3>Documents</h3>${S.docs.filter(d=>d.l<=lv).map(d=>`<p>📄 ${esc(d.n)} <span class="tag">${LV[d.l]}</span></p>`).join("")}
+${can("Admin","Faculty")?`<hr style="border:0;border-top:1px solid var(--bd)"><h3>Upload document</h3><input type="file" id="fu" accept=".txt,.md,.csv"><label>Access level</label><select id="fl">${LV.map((x,i)=>i<=lv?`<option value="${i}">${x}</option>`:"").join("")}</select><p><button onclick="upload()">Add document</button></p><div id="um"></div>`:`<p class="mu">Uploading is limited to faculty and administrators.</p>`}</div></div>`}};
+const A={faculty(){mats()}};
+function mats(){const m=$("#mats");if(m)m.innerHTML=S.mats.length?S.mats.map((x,i)=>`<p><b>${esc(x.n)}</b> <span class="tag">${x.t}</span> <button onclick="$('#gd').value=S.mats[${i}].b">Edit</button> <button onclick="S.mats.splice(${i},1);mats()">Delete</button></p>`).join(""):'<p class="mu">Nothing saved yet.</p>'}
+function gen(){const t=$("#gt").value,c=$("#gc").value||"Topic",n=+$("#gn").value||5,L=[];
+if(t=="Lesson plan"){L.push(`LESSON PLAN: ${c}`,`Duration: ${n*10} minutes`,"","Objectives:","1. Define key concepts of the topic","2. Apply them to worked examples","3. Evaluate understanding through a short check","","Outline:",...Array.from({length:n},(_,i)=>`${i*10}–${i*10+10} min: ${["Hook & prior knowledge","Concept introduction","Worked example","Guided practice","Pair activity","Discussion","Independent task","Common mistakes","Recap","Exit ticket"][i%10]}`),"","Assessment: exit ticket + homework problem set")}
+else if(t=="Quiz"){L.push(`QUIZ: ${c}`,"");for(let i=1;i<=n;i++)L.push(`Q${i}. [Write question ${i} on ${c}]`,"   a) ____  b) ____  c) ____  d) ____","   Answer: __","")}
+else if(t=="Question paper"){L.push(`QUESTION PAPER: ${c}`,"Max marks: 100   Time: 3 hours","","PART A – 10 × 2 = 20 (short answer)",...Array.from({length:Math.min(n,10)},(_,i)=>`${i+1}. [Question]`),"","PART B – 5 × 16 = 80 (descriptive)",...Array.from({length:5},(_,i)=>`${11+i}. (a) [Question] (8)  (b) [Question] (8)`))}
+else{const lo=Object.entries(S.topics).map(([k,v])=>[k,avg(v)]).sort((a,b)=>a[1]-b[1]);L.push(`ACADEMIC REPORT: ${c}`,"","Attendance: "+S.att.filter(a=>a[0]/a[1]>=.75).length+" of "+S.students.length+" students at or above 75%.",`Class average across topics: ${avg(lo.map(x=>x[1])).toFixed(1)}%.`,`Weakest topic: ${lo[0][0]} (${lo[0][1].toFixed(1)}%). Strongest: ${lo[5][0]} (${lo[5][1].toFixed(1)}%).`,"","Recommended actions:","- Schedule a revision session for the weakest topic","- Follow up with students below attendance threshold")}
+$("#gd").value=L.join("\n")}
+function saveMat(){const b=$("#gd").value.trim();if(!b)return;S.mats.push({n:$("#gname").value||$("#gc").value,t:$("#gt").value,b});mats()}
+function grade(){const m=$("#gm").value.split(",").map(Number).filter(x=>!isNaN(x)),g=x=>x>=90?"O":x>=80?"A":x>=70?"B":x>=60?"C":x>=50?"D":"F";
+$("#gout").innerHTML=`<p>Mean <b>${avg(m).toFixed(1)}</b> · Pass rate <b>${Math.round(m.filter(x=>x>=50).length/m.length*100)}%</b></p>`+m.map((x,i)=>`<span class="tag" style="margin:2px">${S.students[i]||"#"+(i+1)}: ${x} → ${g(x)}</span>`).join("")}
+function t2m(t){const[a,b]=t.split(":");return a*60+ +b}
+function reserve(){const e=$("#re").value,d=$("#rd").value,s=$("#rs").value,n=$("#rn").value,u=$("#ru").value.trim(),m=$("#rm");
+if(!u||!d||!s||!n){m.innerHTML='<div class="msg er">Please complete all fields.</div>';return}
+if(t2m(n)<=t2m(s)){m.innerHTML='<div class="msg er">End time must be after start time.</div>';return}
+const c=S.res.find(r=>r[0]==e&&r[1]==d&&t2m(s)<t2m(r[3])&&t2m(n)>t2m(r[2]));
+if(c){m.innerHTML=`<div class="msg er">Conflict: ${e} is already reserved ${c[2]}–${c[3]} by ${esc(c[4])}.</div>`;return}
+S.res.push([e,d,s,n,u]);S.usage[e]+=(t2m(n)-t2m(s))/60;draw()}
+function ask(){const q=$("#q").value.toLowerCase().match(/[a-z0-9]{3,}/g)||[],lv=rank(S.role),stop=["the","for","what","how","are","and","does","with","that","this","who"],k=q.filter(w=>!stop.includes(w));
+const hits=[];S.docs.filter(d=>d.l<=lv).forEach(d=>d.t.split(/\n\n+/).forEach(p=>{const sc=k.reduce((a,w)=>a+(p.toLowerCase().includes(w)?1:0),0);if(sc)hits.push({sc,p,n:d.n})}));
+hits.sort((a,b)=>b.sc-a.sc);$("#ans").innerHTML=hits.length?`<p class="mu">Best matches from documents you can access:</p>`+hits.slice(0,3).map(h=>`<div class="hit">${esc(h.p)}<br><span class="mu" style="font-size:12px">Source: ${esc(h.n)}</span></div>`).join(""):`<div class="msg">No answer found in the documents available to your role. Confidential material is not searched.</div>`}
+function upload(){const f=$("#fu").files[0];if(!f){$("#um").innerHTML='<div class="msg er">Choose a text file first.</div>';return}
+const r=new FileReader();r.onload=()=>{S.docs.push({n:f.name,l:+$("#fl").value,t:String(r.result)});draw()};r.readAsText(f)}
+init();
+</script></body></html>
